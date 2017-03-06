@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pm="http://primefaces.org/mobile">
+<f:view renderKitId="PRIMEFACES_MOBILE" />
+<h:head>
+
+</h:head>
+
+<h:body>
+	<pm:page id="main">
+		<h:form id="formMessages">
+			<p:growl id="messages" showDetail="true" />
+
+			<pm:header title="Help Desk - Autenticação" swatch="b">
+
+			</pm:header>
+
+			<pm:field>
+				<p:outputLabel for="email" value="E-mail" />
+				<p:inputMask id="email" required="true" size="35"
+					requiredMessage="O campo E-mail é obrigatório"
+					value="#{autenticacaoBean.usuario.email}" />
+			</pm:field>
+
+			<pm:field>
+				<p:outputLabel for="senha" value="Senha" />
+				<p:password id="senha" maxlength="100" size="35" required="true"
+					requiredMessage="O campo Senha é obrigatório"
+					value="#{autenticacaoBean.usuario.senha}" />
+			</pm:field>
+
+			<p:commandButton value="Autenticar" 
+				icon="ui-icon-delete" styleClass="ui-btn-inline"
+				update=":main:formMessages:messages"
+				actionListener="#{autenticacaoBean.autenticar}" />
+
+			<div data-role="footer" data-position="fixed" data-theme="b">
+				<h1>Grupo Educa - Tecnologia da Informação</h1>
+			</div>
+		</h:form>
+	</pm:page>
+</h:body>
+</html>

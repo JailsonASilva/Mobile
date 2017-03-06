@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pm="http://primefaces.org/mobile">
+<f:view renderKitId="PRIMEFACES_MOBILE" />
+<h:head>
+
+</h:head>
+
+<h:body>
+	<h:form id="form">
+		<p:growl id="messages" showDetail="true" />
+
+		<pm:page id="main">
+			<pm:header title="Por Departamento" swatch="b">
+				<a href="principal.xhtml" data-icon="home" data-theme="b">Menu </a>
+			</pm:header>
+
+			<p:tabView id="tab" cache="true">
+				<p:tab title="Ticket's">
+					<p:dataList value="#{ticketAtendimentoDepartamentoBean.tickets}"
+						var="ticket">
+
+						<p:commandLink update=":form:main:tab form:main:tab:form:painel"
+							actionListener="#{ticketAtendimentoDepartamentoBean.selecionarTicket}"
+							styleClass="ui-icon ui-icon-search">
+
+							<f:attribute name="ticketSelecionado" value="#{ticket}" />
+
+							<f:actionListener
+								type="org.omnifaces.eventlistener.ResetInputAjaxActionListener" />
+
+							<h:outputText value="#{ticket.assunto}" />
+
+							<p>
+								<b>Nº </b> #{ticket.codigo} <b>Data/Hora:</b>
+								#{ticket.dataFormatada} #{ticket.hora}
+							</p>
+							<p>
+								<b>Status:</b> #{ticket.status} <b>Prioridade:</b>
+								#{ticket.prioridadeFormatada}
+							</p>
+							<p>
+								<b>Solicitante:</b> #{ticket.usuario.nome} <b>Atendente:</b>
+								#{ticket.usuarioAtendimento.nome}
+							</p>
+							<p></p>
+
+						</p:commandLink>
+					</p:dataList>
+				</p:tab>
+
+				<p:tab title="Ocorrências" closable="true">
+					<h:form id="form">
+						<p:accordionPanel id="painel">
+							<p:tab
+								title="Nº #{ticketAtendimentoDepartamentoBean.ticket.codigo}">
+								<h:panelGrid columns="2" cellpadding="10">
+
+									<pm:field>
+										<p:outputLabel
+											value="#{ticketAtendimentoDepartamentoBean.ticket.solicitacao}" />
+									</pm:field>
+
+								</h:panelGrid>
+							</p:tab>
+
+							<p:tab title="Ocorrências">
+								<h:panelGrid columns="2" cellpadding="10">
+
+									<p:dataList
+										value="#{ticketAtendimentoDepartamentoBean.ocorrencias}"
+										var="ocorrencia">
+
+										<p:outputLabel
+											value="#{ocorrencia.dataFormatada} #{ocorrencia.hora}" />
+
+										<p:outputLabel value="#{ocorrencia.ocorrencia}"
+											style="white-space:normal !important;" />
+
+										<p>
+											<b>Usuário:</b> #{ocorrencia.usuario.nome}
+										</p>
+									</p:dataList>
+
+								</h:panelGrid>
+							</p:tab>
+
+						</p:accordionPanel>
+					</h:form>
+				</p:tab>
+			</p:tabView>
+
+			<p:commandButton value="Atender" icon="ui-icon-action"
+				update=":form:messages :form:main:tab:form:painel"
+				actionListener="#{ticketAtendimentoDepartamentoBean.atenderTicket}">
+				<p:confirm header="Confirmação"
+					message="Deseja Atender este Ticket?" icon="ui-icon-alert" />
+			</p:commandButton>
+
+			<p:commandButton value="Suspender" icon="ui-icon-alert"
+				update=":form:messages :form:main:tab:form:painel :form:main:tab"
+				actionListener="#{ticketAtendimentoDepartamentoBean.suspenderTicket}">
+				<p:confirm header="Confirmação"
+					message="Deseja Suspender este Ticket?" icon="ui-icon-alert" />
+			</p:commandButton>
+
+			<p:commandButton value="Concluir" icon="ui-icon-check"
+				update=":form:messages :form:main:tab:form:painel :form:main:tab"
+				actionListener="#{ticketAtendimentoDepartamentoBean.concluirTicket}">
+				<p:confirm header="Confirmação"
+					message="Deseja Concluir este Ticket?" icon="ui-icon-alert" />
+			</p:commandButton>
+
+			<p:commandButton value="Encaminhar" icon="ui-icon-arrow-r"
+				oncomplete="PF('dialogoEncaminhar').show()"
+				update=":form:messages :form:main:tab:form:painel :form:main:tab">
+			</p:commandButton>
+
+			<p:commandButton value="Ocorrência"
+				oncomplete="PF('dialogoOcorrencia').show();" icon="ui-icon-forward"
+				actionListener="#{ticketAtendimentoDepartamentoBean.novaOcorrencia}"
+				update=":formCadastroOcorrencia:painelOcorrencia">
+				<f:actionListener
+					type="org.omnifaces.eventlistener.ResetInputAjaxActionListener" />
+			</p:commandButton>
+
+
+			<div data-role="footer" data-position="fixed" data-theme="b">
+				<h1>Grupo Educa - Tecnologia da Informação</h1>
+			</div>
+		</pm:page>
+
+
+		<p:confirmDialog global="true"
+			styleClass="ui-page-theme-a ui-bar-inherit">
+			<p:commandButton value="Sim" type="button"
+				styleClass="ui-confirmdialog-yes" icon="ui-icon-check" />
+			<p:commandButton value="Não" type="button"
+				styleClass="ui-confirmdialog-no" icon="ui-icon-delete" />
+		</p:confirmDialog>
+	</h:form>
+
+	<p:dialog header="Encaminhar Ticket" widgetVar="dialogoEncaminhar"
+		styleClass="ui-page-theme-a ui-bar-inherit" draggable="false"
+		resizable="false" closable="true">
+		<h:form id="formEncaminhar">
+
+			<h:panelGrid id="painelUsuario" columns="2" class="ui-noborder">
+				<p:outputLabel for="usuario" value="Para: " />
+				<h:panelGroup>
+					<p:selectOneMenu id="usuario" filter="true"
+						value="#{ticketAtendimentoDepartamentoBean.ticket.usuarioAtendimento}"
+						required="true" requiredMessage="O campo 'Usuario' é obrigatório"
+						converter="omnifaces.SelectItemsConverter">
+						<f:selectItem noSelectionOption="true" itemLabel="Não Selecionado" />
+						<f:selectItems
+							value="#{ticketAtendimentoDepartamentoBean.usuarios}"
+							var="usuario" itemValue="#{usuario}" itemLabel="#{usuario.nome}" />
+					</p:selectOneMenu>
+				</h:panelGroup>
+			</h:panelGrid>
+
+			<h:panelGrid columns="2" class="ui-noborder">
+				<h:panelGrid columns="2">
+					<p:commandButton value="Encaminhar" icon="ui-icon-check"
+						actionListener="#{ticketAtendimentoDepartamentoBean.encaminharTicket}"
+						update=":form:messages :form:main:tab:form:painel :form:main:tab" />
+
+					<p:commandButton value="Fechar" icon="ui-icon-delete"
+						oncomplete="PF('dialogoEncaminhar').hide();" />
+				</h:panelGrid>
+			</h:panelGrid>
+		</h:form>
+	</p:dialog>
+
+	<p:dialog header="Ocorrência" widgetVar="dialogoOcorrencia"
+		styleClass="ui-page-theme-a ui-bar-inherit" draggable="false"
+		resizable="false" closable="true">
+		<h:form id="formCadastroOcorrencia">
+			<h:panelGrid id="painelOcorrencia" columns="1" class="ui-noborder">
+
+				<pm:field>
+					<p:outputLabel for="ocorrencia" value="Informe a Ocorrência" />
+					<p:inputTextarea id="ocorrencia" rows="4" cols="40"
+						counter="display" maxlength="600"
+						counterTemplate="{0} caracteres restantes." autoResize="false"
+						value="#{ticketAtendimentoDepartamentoBean.ocorrencia.ocorrencia}" />
+
+					<h:outputText id="display" />
+				</pm:field>
+
+			</h:panelGrid>
+			<p:separator />
+
+			<h:panelGrid columns="3">
+				<p:commandButton value="Salvar" icon="ui-icon-check"
+					actionListener="#{ticketAtendimentoDepartamentoBean.salvarOcorrencia}"
+					update=":form:messages :form:main:tab:form:painel :form:main:tab" />
+
+				<p:commandButton value="Fechar" icon="ui-icon-delete"
+					oncomplete="PF('dialogoOcorrencia').hide();" />
+			</h:panelGrid>
+		</h:form>
+	</p:dialog>
+
+</h:body>
+</html>
